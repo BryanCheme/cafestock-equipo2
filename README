@@ -1,0 +1,26 @@
+CaféStock — Equipo 2 (Escenario A)
+
+Aplicación de escritorio en Java para la gestión de inventario y registro de ventas de la cafetería universitaria administrada por Rosa.
+
+-Integrantes y Roles
+Samara Salazar: Product Owner y Desarrolladora
+Bryan Cheme: Scrum Master y Desarrollador
+Kenneth Gaona: Desarrollador
+Bryan Toapanta:** Desarrollador
+
+-Tecnologías Utilizadas
+Lenguaje: Java (JDK)
+Interfaz Gráfica: Java Swing
+Persistencia de Datos: Archivos planos CSV (`productos.csv` y `ventas.csv`)
+Gestión Ágil: Scrum con tablero en Trello
+
+-Tablero de Trello
+https://trello.com/invite/b/6afe415fbf5f492a22c35da3/ATTIec601c1bb4f80e3fb71de0f4f92d5e33C2BA4F4D/equipo-2-escenario-a-cafestock 
+
+--Cómo ejecutar la aplicación
+1. Descargar o clonar este repositorio.
+2. Ingresar a la carpeta `dist/`.
+3. Asegurarse de que los archivos de datos de prueba (`productos.csv` y `ventas.csv`) estén en la misma carpeta que el ejecutable.
+4. Ejecutar el archivo `CafeStock.jar` con doble clic o mediante terminal:
+   bash
+   java -jar CafeStock.jar
