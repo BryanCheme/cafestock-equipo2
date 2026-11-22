@@ -21,7 +21,7 @@ public class Validador {
         if (!esEdicion) {
             for (Producto p : existentes) {
                 if (p.getCodigo().equalsIgnoreCase(codigo.trim())) {
-                    return "El codigo '" + codigo.trim() + "' ya existe.";
+                    return "El codigo '" + codigo.trim() + "' ya existe,";
                 }
             }
         }
