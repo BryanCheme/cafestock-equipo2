@@ -13,6 +13,7 @@ Aplicación de escritorio en Java para la gestión de inventario y ventas de la 
 - **Interfaz Gráfica:** Java Swing
 - **Persistencia de Datos:** Archivos CSV / SQLite
 - **Gestión Ágil:** Scrum con tablero en Trello
+- **IDE de desarrollo:** IntelliJ IDEA
 
 ## Tablero de Trello
 - Tablero: https://trello.com/b/fpJKrnBK
