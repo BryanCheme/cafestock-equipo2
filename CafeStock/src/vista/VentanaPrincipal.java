@@ -6,9 +6,9 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
-import logica.Validaciones;
+import logica.Validador;
 import modelo.Producto;
 import modelo.Venta;
 import persistencia.GestorCSV;
@@ -63,7 +63,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private void configurarInterfazCafeStock() {
-        setTitle("CaféStock - Equipo 2 (Escenario A)");
+        setTitle("CafeStock - Equipo 2 (Escenario A)");
         setSize(920, 620);
         setLocationRelativeTo(null);
 
@@ -95,7 +95,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel form = new JPanel(new GridLayout(5, 2, 8, 6));
-        form.setBorder(BorderFactory.createTitledBorder("Registro y Edición de Productos"));
+        form.setBorder(BorderFactory.createTitledBorder("Registro y Edicion de Productos"));
 
         txtCodigo = new JTextField();
         txtNombre = new JTextField();
@@ -103,7 +103,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         txtStockActual = new JTextField();
         txtStockMinimo = new JTextField();
 
-        form.add(new JLabel("Código (único):"));
+        form.add(new JLabel("Codigo (unico):"));
         form.add(txtCodigo);
         form.add(new JLabel("Nombre:"));
         form.add(txtNombre);
@@ -111,7 +111,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         form.add(txtPrecio);
         form.add(new JLabel("Stock actual:"));
         form.add(txtStockActual);
-        form.add(new JLabel("Stock mínimo:"));
+        form.add(new JLabel("Stock minimo:"));
         form.add(txtStockMinimo);
 
         btnGuardarNuevo = new JButton("Registrar Producto");
@@ -133,7 +133,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         superior.add(panelBotones, BorderLayout.SOUTH);
 
         JPanel panelBusqueda = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelBusqueda.add(new JLabel("Buscar (código o nombre):"));
+        panelBusqueda.add(new JLabel("Buscar (codigo o nombre):"));
         txtBuscar = new JTextField(24);
         txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -146,7 +146,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         panelBusqueda.add(txtBuscar);
 
         modeloProductos = new DefaultTableModel(
-                new Object[]{"Código", "Nombre", "Precio (USD)", "Stock Actual", "Stock Mínimo"}, 0
+                new Object[]{"Codigo", "Nombre", "Precio (USD)", "Stock Actual", "Stock Minimo"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -213,7 +213,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         superiorVenta.add(panelBtnVenta, BorderLayout.SOUTH);
 
         modeloVentas = new DefaultTableModel(
-                new Object[]{"Número", "Fecha", "Código", "Producto", "Cantidad", "Total (USD)"}, 0
+                new Object[]{"Numero", "Fecha", "Codigo", "Producto", "Cantidad", "Total (USD)"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -228,47 +228,32 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private void registrarProductoUI() {
-        try {
-            String codigo = txtCodigo.getText().trim();
-            String nombre = txtNombre.getText().trim();
-            if (Validaciones.esTextoVacio(codigo)
-                    || Validaciones.esTextoVacio(nombre)
-                    || Validaciones.esTextoVacio(txtPrecio.getText())
-                    || Validaciones.esTextoVacio(txtStockActual.getText())
-                    || Validaciones.esTextoVacio(txtStockMinimo.getText())) {
-                mostrarAviso("Complete todos los campos del producto.");
-                return;
-            }
+        String codigo = txtCodigo.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String precioStr = txtPrecio.getText().trim();
+        String stockStr = txtStockActual.getText().trim();
+        String stockMinStr = txtStockMinimo.getText().trim();
 
-            for (Producto p : productos) {
-                if (p.getCodigo().equalsIgnoreCase(codigo)) {
-                    mostrarAviso("Ya existe un producto con el código " + codigo + ".");
-                    return;
-                }
-            }
-
-            double precio = Double.parseDouble(txtPrecio.getText().trim().replace(',', '.'));
-            int stockActual = Integer.parseInt(txtStockActual.getText().trim());
-            int stockMinimo = Integer.parseInt(txtStockMinimo.getText().trim());
-
-            if (!Validaciones.precioValido(precio)
-                    || !Validaciones.stockValido(stockActual)
-                    || !Validaciones.stockValido(stockMinimo)) {
-                mostrarAviso("El precio debe ser mayor que 0 y los stocks deben ser números enteros desde 0.");
-                return;
-            }
-
-            Producto nuevo = new Producto(codigo, nombre, precio, stockActual, stockMinimo);
-            productos.add(nuevo);
-            gestorCSV.guardarProductos(productos);
-
-            filtrarTablaProductos();
-            refrescarComboProductos();
-            limpiarCamposProducto();
-            JOptionPane.showMessageDialog(this, "Producto guardado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException ex) {
-            mostrarAviso("Revise que el precio y los stocks tengan números válidos.");
+        String error = Validador.validarProducto(
+                codigo, nombre, precioStr, stockStr, stockMinStr, productos, false
+        );
+        if (error != null) {
+            mostrarAviso(error);
+            return;
         }
+
+        double precio = Double.parseDouble(precioStr.replace(',', '.'));
+        int stockActual = Integer.parseInt(stockStr);
+        int stockMinimo = Integer.parseInt(stockMinStr);
+
+        Producto nuevo = new Producto(codigo, nombre, precio, stockActual, stockMinimo);
+        productos.add(nuevo);
+        gestorCSV.guardarProductos(productos);
+
+        filtrarTablaProductos();
+        refrescarComboProductos();
+        limpiarCamposProducto();
+        JOptionPane.showMessageDialog(this, "Producto guardado correctamente.", "Exito", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void seleccionarProductoParaEditar() {
@@ -293,47 +278,39 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private void guardarCambiosProductoUI() {
-        try {
-            String codigo = txtCodigo.getText().trim();
-            String nombre = txtNombre.getText().trim();
-            if (Validaciones.esTextoVacio(codigo)
-                    || Validaciones.esTextoVacio(nombre)
-                    || Validaciones.esTextoVacio(txtPrecio.getText())
-                    || Validaciones.esTextoVacio(txtStockActual.getText())
-                    || Validaciones.esTextoVacio(txtStockMinimo.getText())) {
-                mostrarAviso("Complete todos los campos.");
-                return;
-            }
+        String codigo = txtCodigo.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String precioStr = txtPrecio.getText().trim();
+        String stockStr = txtStockActual.getText().trim();
+        String stockMinStr = txtStockMinimo.getText().trim();
 
-            double precio = Double.parseDouble(txtPrecio.getText().trim().replace(',', '.'));
-            int stockActual = Integer.parseInt(txtStockActual.getText().trim());
-            int stockMinimo = Integer.parseInt(txtStockMinimo.getText().trim());
-
-            if (!Validaciones.precioValido(precio)
-                    || !Validaciones.stockValido(stockActual)
-                    || !Validaciones.stockValido(stockMinimo)) {
-                mostrarAviso("El precio debe ser mayor que 0 y los stocks deben ser números enteros desde 0.");
-                return;
-            }
-
-            for (Producto p : productos) {
-                if (p.getCodigo().equals(codigo)) {
-                    p.setNombre(nombre);
-                    p.setPrecioVenta(precio);
-                    p.setStockActual(stockActual);
-                    p.setStockMinimo(stockMinimo);
-                    break;
-                }
-            }
-
-            gestorCSV.guardarProductos(productos);
-            filtrarTablaProductos();
-            refrescarComboProductos();
-            limpiarCamposProducto();
-            JOptionPane.showMessageDialog(this, "Cambios guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException ex) {
-            mostrarAviso("Revise que el precio y los stocks tengan números válidos.");
+        String error = Validador.validarProducto(
+                codigo, nombre, precioStr, stockStr, stockMinStr, productos, true
+        );
+        if (error != null) {
+            mostrarAviso(error);
+            return;
         }
+
+        double precio = Double.parseDouble(precioStr.replace(',', '.'));
+        int stockActual = Integer.parseInt(stockStr);
+        int stockMinimo = Integer.parseInt(stockMinStr);
+
+        for (Producto p : productos) {
+            if (p.getCodigo().equals(codigo)) {
+                p.setNombre(nombre);
+                p.setPrecioVenta(precio);
+                p.setStockActual(stockActual);
+                p.setStockMinimo(stockMinimo);
+                break;
+            }
+        }
+
+        gestorCSV.guardarProductos(productos);
+        filtrarTablaProductos();
+        refrescarComboProductos();
+        limpiarCamposProducto();
+        JOptionPane.showMessageDialog(this, "Cambios guardados correctamente.", "Exito", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void limpiarCamposProducto() {
@@ -361,7 +338,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 modeloProductos.addRow(new Object[]{
                         p.getCodigo(),
                         p.getNombre(),
-                        String.format("%.2f", p.getPrecioVenta()),
+                        String.format(Locale.US, "%.2f", p.getPrecioVenta()),
                         p.getStockActual(),
                         p.getStockMinimo()
                 });
@@ -392,7 +369,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         }
         Producto prod = (Producto) comboProductos.getSelectedItem();
         String cantTexto = txtCantidadVenta.getText().trim();
-        if (prod == null || Validaciones.esTextoVacio(cantTexto)) {
+        if (prod == null || cantTexto.isEmpty()) {
             lblTotalCalculado.setText("$0.00");
             return;
         }
@@ -402,73 +379,53 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 lblTotalCalculado.setText("$0.00");
                 return;
             }
-            lblTotalCalculado.setText(String.format("$%.2f", prod.getPrecioVenta() * cant));
+            lblTotalCalculado.setText(String.format(Locale.US, "$%.2f", prod.getPrecioVenta() * cant));
         } catch (NumberFormatException ex) {
-            lblTotalCalculado.setText("Inválido");
+            lblTotalCalculado.setText("Invalido");
         }
     }
 
     private void registrarVentaUI() {
         Producto prod = (Producto) comboProductos.getSelectedItem();
-        if (prod == null) {
-            mostrarAviso("Seleccione un producto.");
-            return;
-        }
-
+        String cantStr = txtCantidadVenta.getText().trim();
         String fecha = txtFechaVenta.getText().trim();
-        if (Validaciones.esTextoVacio(fecha)) {
-            mostrarAviso("Ingrese una fecha.");
-            return;
-        }
-        try {
-            LocalDate.parse(fecha, DATE_FMT);
-        } catch (DateTimeParseException ex) {
-            mostrarAviso("La fecha debe tener formato AAAA-MM-DD (ej. 2026-11-20).");
+
+        String error = Validador.validarVenta(prod, cantStr, fecha);
+        if (error != null) {
+            mostrarAviso(error);
             return;
         }
 
-        try {
-            int cant = Integer.parseInt(txtCantidadVenta.getText().trim());
-            if (cant <= 0) {
-                mostrarAviso("La cantidad debe ser mayor que 0.");
-                return;
+        int cant = Integer.parseInt(cantStr);
+        double total = Math.round(prod.getPrecioVenta() * cant * 100.0) / 100.0;
+
+        int maxNumero = 0;
+        for (Venta v : ventas) {
+            if (v.getNumero() > maxNumero) {
+                maxNumero = v.getNumero();
             }
-            if (!Validaciones.cantidadVentaValida(cant, prod.getStockActual())) {
-                mostrarAviso("Stock insuficiente. Disponible: " + prod.getStockActual());
-                return;
-            }
-
-            double total = Math.round(prod.getPrecioVenta() * cant * 100.0) / 100.0;
-            int maxNumero = 0;
-            for (Venta v : ventas) {
-                if (v.getNumero() > maxNumero) {
-                    maxNumero = v.getNumero();
-                }
-            }
-            int nuevoNumero = maxNumero + 1;
-
-            prod.setStockActual(prod.getStockActual() - cant);
-            Venta nuevaVenta = new Venta(
-                    nuevoNumero,
-                    fecha,
-                    prod.getCodigo(),
-                    prod.getNombre(),
-                    cant,
-                    total
-            );
-            ventas.add(nuevaVenta);
-
-            gestorCSV.guardarProductos(productos);
-            gestorCSV.guardarVentas(ventas);
-
-            txtCantidadVenta.setText("");
-            filtrarTablaProductos();
-            refrescarComboProductos();
-            refrescarTablaVentas();
-            JOptionPane.showMessageDialog(this, "Venta registrada y stock actualizado.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException ex) {
-            mostrarAviso("Ingrese una cantidad numérica válida.");
         }
+        int nuevoNumero = maxNumero + 1;
+
+        prod.setStockActual(prod.getStockActual() - cant);
+        Venta nuevaVenta = new Venta(
+                nuevoNumero,
+                fecha,
+                prod.getCodigo(),
+                prod.getNombre(),
+                cant,
+                total
+        );
+        ventas.add(nuevaVenta);
+
+        gestorCSV.guardarProductos(productos);
+        gestorCSV.guardarVentas(ventas);
+
+        txtCantidadVenta.setText("");
+        filtrarTablaProductos();
+        refrescarComboProductos();
+        refrescarTablaVentas();
+        JOptionPane.showMessageDialog(this, "Venta registrada y stock actualizado.", "Exito", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void refrescarTablaVentas() {
@@ -483,7 +440,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                     v.getCodigoProducto(),
                     v.getNombreProducto(),
                     v.getCantidad(),
-                    String.format("%.2f", v.getTotal())
+                    String.format(Locale.US, "%.2f", v.getTotal())
             });
         }
     }
@@ -497,12 +454,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 300, Short.MAX_VALUE)
         );
         pack();
     }
