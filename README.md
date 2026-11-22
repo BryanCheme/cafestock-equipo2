@@ -11,7 +11,7 @@ Aplicación de escritorio en Java para la gestión de inventario y ventas de la 
 ## Tecnologías Utilizadas
 - **Lenguaje:** Java (JDK)
 - **Interfaz Gráfica:** Java Swing
-- **Persistencia de Datos:** Archivos CSV / SQLite
+- **Persistencia de Datos:** Archivos CSV
 - **Gestión Ágil:** Scrum con tablero en Trello
 - **IDE de desarrollo:** IntelliJ IDEA
 
