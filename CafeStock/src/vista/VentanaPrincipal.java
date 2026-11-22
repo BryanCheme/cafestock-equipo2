@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -65,7 +66,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private void configurarInterfazCafeStock() {
-        setTitle("CaféStock - Equipo 2 (Escenario A)");
+        setTitle("CafeStock - Equipo 2 (Escenario A)");
         setSize(920, 620);
         setLocationRelativeTo(null);
 
@@ -97,7 +98,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel form = new JPanel(new GridLayout(5, 2, 8, 6));
-        form.setBorder(BorderFactory.createTitledBorder("Registro y Edición de Productos"));
+        form.setBorder(BorderFactory.createTitledBorder("Registro y Edicion de Productos"));
 
         txtCodigo = new JTextField();
         txtNombre = new JTextField();
@@ -105,7 +106,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         txtStockActual = new JTextField();
         txtStockMinimo = new JTextField();
 
-        form.add(new JLabel("Código (único):"));
+        form.add(new JLabel("Codigo (unico):"));
         form.add(txtCodigo);
         form.add(new JLabel("Nombre:"));
         form.add(txtNombre);
@@ -113,7 +114,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         form.add(txtPrecio);
         form.add(new JLabel("Stock actual:"));
         form.add(txtStockActual);
-        form.add(new JLabel("Stock mínimo:"));
+        form.add(new JLabel("Stock minimo:"));
         form.add(txtStockMinimo);
 
         btnGuardarNuevo = new JButton("Registrar Producto");
@@ -135,7 +136,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         superior.add(panelBotones, BorderLayout.SOUTH);
 
         JPanel panelBusqueda = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelBusqueda.add(new JLabel("Buscar (código o nombre):"));
+        panelBusqueda.add(new JLabel("Buscar (codigo o nombre):"));
         txtBuscar = new JTextField(24);
         txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -148,7 +149,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         panelBusqueda.add(txtBuscar);
 
         modeloProductos = new DefaultTableModel(
-                new Object[]{"Código", "Nombre", "Precio (USD)", "Stock Actual", "Stock Mínimo"}, 0
+                new Object[]{"Codigo", "Nombre", "Precio (USD)", "Stock Actual", "Stock Minimo"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -215,7 +216,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         superiorVenta.add(panelBtnVenta, BorderLayout.SOUTH);
 
         modeloVentas = new DefaultTableModel(
-                new Object[]{"Número", "Fecha", "Código", "Producto", "Cantidad", "Total (USD)"}, 0
+                new Object[]{"Numero", "Fecha", "Codigo", "Producto", "Cantidad", "Total (USD)"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -241,9 +242,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 return;
             }
 
+            if (codigo.contains(";") || nombre.contains(";")) {
+                mostrarAviso("El codigo y el nombre no pueden contener punto y coma (;).");
+                return;
+            }
+
             for (Producto p : productos) {
                 if (p.getCodigo().equalsIgnoreCase(codigo)) {
-                    mostrarAviso("Ya existe un producto con el código " + codigo + ".");
+                    mostrarAviso("Ya existe un producto con el codigo " + codigo + ".");
                     return;
                 }
             }
@@ -264,9 +270,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             filtrarTablaProductos();
             refrescarComboProductos();
             limpiarCamposProducto();
-            JOptionPane.showMessageDialog(this, "Producto guardado en CSV.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Producto guardado en CSV.", "Exito", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
-            mostrarAviso("Revise que precio y stocks tengan números válidos.");
+            mostrarAviso("Revise que precio y stocks tengan numeros validos.");
         }
     }
 
@@ -279,7 +285,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         for (Producto p : productos) {
             if (p.getCodigo().equals(codigo)) {
                 txtCodigo.setText(p.getCodigo());
-                txtCodigo.setEditable(false); // Código bloqueado al editar (HU-A2)
+                txtCodigo.setEditable(false);
                 txtNombre.setText(p.getNombre());
                 txtPrecio.setText(String.valueOf(p.getPrecioVenta()));
                 txtStockActual.setText(String.valueOf(p.getStockActual()));
@@ -300,6 +306,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                     || txtStockActual.getText().trim().isEmpty()
                     || txtStockMinimo.getText().trim().isEmpty()) {
                 mostrarAviso("Complete todos los campos.");
+                return;
+            }
+
+            if (codigo.contains(";") || nombre.contains(";")) {
+                mostrarAviso("El codigo y el nombre no pueden contener punto y coma (;).");
                 return;
             }
 
@@ -326,9 +337,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             filtrarTablaProductos();
             refrescarComboProductos();
             limpiarCamposProducto();
-            JOptionPane.showMessageDialog(this, "Cambios guardados en CSV.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Cambios guardados en CSV.", "Exito", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
-            mostrarAviso("Revise que precio y stocks tengan números válidos.");
+            mostrarAviso("Revise que precio y stocks tengan numeros validos.");
         }
     }
 
@@ -357,7 +368,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 modeloProductos.addRow(new Object[]{
                         p.getCodigo(),
                         p.getNombre(),
-                        String.format("%.2f", p.getPrecioVenta()),
+                        String.format(Locale.US, "%.2f", p.getPrecioVenta()),
                         p.getStockActual(),
                         p.getStockMinimo()
                 });
@@ -398,9 +409,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 lblTotalCalculado.setText("$0.00");
                 return;
             }
-            lblTotalCalculado.setText(String.format("$%.2f", prod.getPrecioVenta() * cant));
+            lblTotalCalculado.setText(String.format(Locale.US, "$%.2f", prod.getPrecioVenta() * cant));
         } catch (NumberFormatException ex) {
-            lblTotalCalculado.setText("Inválido");
+            lblTotalCalculado.setText("Invalido");
         }
     }
 
@@ -455,9 +466,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             filtrarTablaProductos();
             refrescarComboProductos();
             refrescarTablaVentas();
-            JOptionPane.showMessageDialog(this, "Venta registrada en CSV y stock actualizado.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Venta registrada en CSV y stock actualizado.", "Exito", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
-            mostrarAviso("Ingrese una cantidad numérica válida.");
+            mostrarAviso("Ingrese una cantidad numerica valida.");
         }
     }
 
@@ -473,7 +484,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                     v.getCodigoProducto(),
                     v.getNombreProducto(),
                     v.getCantidad(),
-                    String.format("%.2f", v.getTotal())
+                    String.format(Locale.US, "%.2f", v.getTotal())
             });
         }
     }
@@ -490,12 +501,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 300, Short.MAX_VALUE)
         );
 
         pack();
@@ -518,4 +529,4 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
-            }
+}
