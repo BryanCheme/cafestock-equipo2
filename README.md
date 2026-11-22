@@ -22,4 +22,4 @@ Aplicación de escritorio en Java para la gestión de inventario y ventas de la 
 2. Ir a la carpeta `CafeStock/dist/`.
 3. Ejecutar el archivo `.jar` desde terminal:
    ```bash
-   java -jar CafeStock.jar
+   java -jar cafestock-equipo2.jar
