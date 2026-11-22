@@ -1,9 +1,9 @@
 package logica;
 
-import modelo.Producto;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import modelo.Producto;
 
 public class Validador {
 
@@ -18,17 +18,21 @@ public class Validador {
             return "Todos los campos son obligatorios.";
         }
 
+        if (codigo.contains(";") || nombre.contains(";")) {
+            return "El codigo y el nombre no pueden contener punto y coma (;).";
+        }
+
         if (!esEdicion) {
             for (Producto p : existentes) {
                 if (p.getCodigo().equalsIgnoreCase(codigo.trim())) {
-                    return "El codigo '" + codigo.trim() + "' ya existe,";
+                    return "El codigo '" + codigo.trim() + "' ya existe.";
                 }
             }
         }
 
         try {
             double precio = Double.parseDouble(precioStr.trim().replace(",", "."));
-            if (precio <= 0) {
+            if (Double.isNaN(precio) || Double.isInfinite(precio) || precio <= 0) {
                 return "El precio de venta debe ser mayor que 0.";
             }
         } catch (NumberFormatException e) {
@@ -56,16 +60,20 @@ public class Validador {
             return "La fecha es obligatoria.";
         }
         try {
-            LocalDate.parse(fechaStr.trim()); // Valida formato YYYY-MM-DD
+            LocalDate.parse(fechaStr.trim());
         } catch (DateTimeParseException e) {
             return "La fecha debe tener el formato AAAA-MM-DD (ej. 2026-11-21).";
+        }
+
+        if (cantidadStr == null || cantidadStr.trim().isEmpty()) {
+            return "Ingrese una cantidad.";
         }
 
         int cantidad;
         try {
             cantidad = Integer.parseInt(cantidadStr.trim());
         } catch (NumberFormatException e) {
-            return "La cantidad debe ser un número entero valido.";
+            return "La cantidad debe ser un numero entero valido.";
         }
 
         if (cantidad <= 0) {
