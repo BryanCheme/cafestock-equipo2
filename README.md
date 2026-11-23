@@ -16,7 +16,7 @@ Aplicación de escritorio en Java para la gestión de inventario y ventas de la 
 - **IDE de desarrollo:** IntelliJ IDEA
 
 ## Tablero de Trello
-- Tablero: https://trello.com/b/fpJKrnBK
+- Tablero: https://n9.cl/81q9f
 
 ## Cómo ejecutar la aplicación
 1. Descargar o clonar este repositorio.
